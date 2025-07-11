@@ -1,5 +1,6 @@
 #include "SimplePathFinding.hpp"
 
+#include <Scenario/System/Map/IMap.hpp>
 #include <ranges>
 
 namespace sw::sc
@@ -28,7 +29,10 @@ namespace sw::sc
 	}
 
 	Coord<Cells> SimplePathFinding::findNextCell(
-		const Coord<Cells>& currentCell, const Coord<Cells>& destinationCell, Speed<Cells> speed)
+		const struct IMap& map,
+		const Coord<Cells>& currentCell,
+		const Coord<Cells>& destinationCell,
+		Speed<Cells> speed)
 	{
 		if (currentCell == destinationCell || speed == 0)
 		{
@@ -37,9 +41,17 @@ namespace sw::sc
 
 		Coord<Cells> cell = currentCell;
 
-		for (auto const _ : std::views::iota(0u, speed))
+		for (const auto _ : std::views::iota(0u, speed))
 		{
-			cell = offsetCoord(cell, getOffset(cell.x(), destinationCell.x()), getOffset(cell.y(), destinationCell.y()));
+			const auto nextCell
+				= offsetCoord(cell, getOffset(cell.x(), destinationCell.x()), getOffset(cell.y(), destinationCell.y()));
+
+			if (map.getUnitInCell(nextCell))
+			{
+				break;
+			}
+
+			cell = nextCell;
 
 			if (cell == destinationCell)
 			{

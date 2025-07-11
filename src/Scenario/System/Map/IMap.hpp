@@ -17,6 +17,7 @@ namespace sw::sc
 
 		virtual Coord<Cells> getUnitCell(EntityId unitId) const = 0;
 		virtual std::unordered_set<EntityId> getUnitsInArea(const Coord<Cells>& center, Cells range) const = 0;
+		virtual std::optional<EntityId> getUnitInCell(const Coord<Cells>& cell) const = 0;
 		virtual Width<Cells> width() const = 0;
 		virtual Height<Cells> height() const = 0;
 		virtual Coord<Cells> moveUnitToDestinationCell(
