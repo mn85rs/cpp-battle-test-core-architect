@@ -1,0 +1,15 @@
+@startuml
+participant Scenario
+participant MarchSystem
+participant Map
+participant Unit
+
+Scenario -> MarchSystem: setMarchDestinationForUnit(unitId, destination)
+Scenario -> Unit: takeTurn()
+Unit -> MarchSystem: marchUnit(unitId, speed)
+MarchSystem -> MarchSystem: findNextCell(unitId, destination, speed)
+MarchSystem -> Map: moveUnitToCell(unitId, nextCell)
+MarchSystem --> Unit : MovingStatus
+Unit --> Scenario : TurnStatus
+
+@enduml

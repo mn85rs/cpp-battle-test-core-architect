@@ -12,7 +12,7 @@ namespace sw::io
 		uint32_t height{};
 
 		template <typename Visitor>
-		void visit(Visitor& visitor)
+		void visit(Visitor& visitor) const
 		{
 			visitor.visit("width", width);
 			visitor.visit("height", height);

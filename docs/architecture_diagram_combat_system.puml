@@ -1,0 +1,44 @@
+@startuml
+
+interface ICombatSystem {
++AttackResult attackFromUnit(EntityId attackerUnitId, const Attack& attack)
++bool anyUnitsInRangeAroundUnit(EntityId unitId, DetectRange<Cells> range)
++void registerUnitAsTarget(EntityId targetUnitId, AttackType type, TakeDamageHandler onTakeDamage)
++void unRegisterUnitAsTarget(EntityId targetUnitId, AttackType type)
++void subscribeUnitAttackedEvent(UnitAttackedHandler handler)
+}
+
+interface IMap {
++std::optional<EntityId> getUnitAtCell(const Coord<Cells>& cell) const
++std::optional<Coord<Cells>> getUnitCell(EntityId unitId) const
++Width<Cells> width() const
++Height<Cells> height() const
++void moveUnitToCell(EntityId unitId, const Coord<Cells>& cell
++void spawnUnitInCell(EntityId unitId, const Coord<Cells>& cell)
++void subscribeUnitMovedEvent(UnitMovedHandler handler)
+}
+
+class CombatSystem {
+-const IMap& _map;
+
+using TargetToDamageHandler = std::unordered_map<EntityId, TakeDamageHandler>;
+using AttackTypeToTargets = std::unordered_map<AttackType, TargetToDamageHandler>;
+
+-AttackTypeToTargets _targets;
++AttackResult attackFromUnit(EntityId attackerUnitId, const Attack& attack)
++bool anyUnitsInRangeAroundUnit(EntityId unitId, DetectRange<Cells> range)
++void registerUnitAsTarget(EntityId targetUnitId, AttackType type, TakeDamageHandler onTakeDamage)
++void unRegisterUnitAsTarget(EntityId targetUnitId, AttackType type)
++void subscribeUnitAttackedEvent(UnitAttackedHandler handler)
+}
+
+class TakeDamageHandler{}
+
+CombatSystem ..|> ICombatSystem
+
+' Владение (композиция)
+
+CombatSystem o-- TakeDamageHandler : 0..n
+CombatSystem --> IMap : uses
+
+@enduml

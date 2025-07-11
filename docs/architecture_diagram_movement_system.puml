@@ -1,0 +1,37 @@
+@startuml
+
+interface IMap {
++std::optional<EntityId> getUnitAtCell(const Coord<Cells>& cell) const
++std::optional<Coord<Cells>> getUnitCell(EntityId unitId) const
++Width<Cells> width() const
++Height<Cells> height() const
++void moveUnitToCell(EntityId unitId, const Coord<Cells>& cell
++void spawnUnitInCell(EntityId unitId, const Coord<Cells>& cell)
++void subscribeUnitMovedEvent(UnitMovedHandler handler)
+}
+
+interface IMarchSystem {
++MarchStatus marchUnit(EntityId unitId, Speed<Cells> speed)
++void setMarchDestinationForUnit(EntityId unitId, const Coord<Cells>& destination)
++void subscribeUnitMarchEvents(UnitMarchStartedHandler marchStartedHandler, UnitMarchEndedHandler marchEndedHandler)
+}
+
+class MarchSystem {
+-IMap& _map;
+
+using UnitToDestination = std::unordered_map<EntityId, Coord<Cells>>;
+
+-UnitToDestination _unitDestinations;
++MarchStatus marchUnit(EntityId unitId, Speed<Cells> speed)
++void setMarchDestinationForUnit(EntityId unitId, const Coord<Cells>& destination)
++void subscribeUnitMarchEvents(UnitMarchStartedHandler marchStartedHandler, UnitMarchEndedHandler marchEndedHandler)
+-Coord<Cells> findNextCell(const Coord<Cells>& currentCell, const Coord<Cells>& destinationCell, Speed<Cells> speed)
+}
+
+MarchSystem ..|> IMarchSystem
+
+' Владение (композиция)
+
+MarchSystem --> IMap : uses
+
+@enduml

@@ -1,0 +1,133 @@
+@startuml
+class EventHandlers {
++EventHandler<io::MapCreated> mapCreatedHandler;
++EventHandler<io::UnitSpawned> unitSpawnedHandler;
++EventHandler<io::UnitDied> unitDiedHandler;
++EventHandler<io::UnitMoved> unitMovedHandler;
++EventHandler<io::UnitAttacked> unitAttackedHandler;
++EventHandler<io::MarchStarted> marchStartedHandler;
++EventHandler<io::MarchEnded> marchEndedHandler;
+}
+
+interface ICombatSystem {
++AttackResult attackFromUnit(EntityId attackerUnitId, const Attack& attack)
++bool anyUnitsInRangeAroundUnit(EntityId unitId, DetectRange<Cells> range)
++void registerUnitAsTarget(EntityId targetUnitId, AttackType type, TakeDamageHandler onTakeDamage)
++void unRegisterUnitAsTarget(EntityId targetUnitId, AttackType type)
++void subscribeUnitAttackedEvent(UnitAttackedHandler handler)
+}
+
+interface IMap {
++std::optional<EntityId> getUnitAtCell(const Coord<Cells>& cell) const
++std::optional<Coord<Cells>> getUnitCell(EntityId unitId) const
++Width<Cells> width() const
++Height<Cells> height() const
++void moveUnitToCell(EntityId unitId, const Coord<Cells>& cell
++void spawnUnitInCell(EntityId unitId, const Coord<Cells>& cell)
++void subscribeUnitMovedEvent(UnitMovedHandler handler)
+}
+
+interface IMarchSystem {
++MarchStatus marchUnit(EntityId unitId, Speed<Cells> speed)
++void setMarchDestinationForUnit(EntityId unitId, const Coord<Cells>& destination)
++void subscribeUnitMarchEvents(UnitMarchStartedHandler marchStartedHandler, UnitMarchEndedHandler marchEndedHandler)
+}
+
+interface IScenario {
++void subscribeEvents(EventHandlers handlers)
++void createMap(Width<Cells> width, Height<Cells> height)
++void spawnUnit(const Coord<Cells>& cell, UnitFaсtory unitFactory)
++void marchUnit(EntityId unitId, const Coord<Cells>& cell)
++void run()
+}
+
+interface IUnit {
++EntityId id() const
++const char* type() const
++bool isAlive() const
++TurnStatus takeTurn()
++void subscribeUnitDestroyedEvent(UnitDestroyedHandler handler)
+}
+
+interface IUnitCreationContext {
++ICombatSystem& getCombatSystem()
++IMarchSystem& getMarchSystem()
+}
+
+class Map {
++std::optional<EntityId> getUnitAtCell(const Coord<Cells>& cell) const
++std::optional<Coord<Cells>> getUnitCell(EntityId unitId) const
++Width<Cells> width() const
++Height<Cells> height() const
++void moveUnitToCell(EntityId unitId, const Coord<Cells>& cell
++void spawnUnitInCell(EntityId unitId, const Coord<Cells>& cell)
++void subscribeUnitMovedEvent(UnitMovedHandler handler)
+}
+
+class CombatSystem {
++AttackResult attackFromUnit(EntityId attackerUnitId, const Attack& attack)
++bool anyUnitsInRangeAroundUnit(EntityId unitId, DetectRange<Cells> range)
++void registerUnitAsTarget(EntityId targetUnitId, AttackType type, TakeDamageHandler onTakeDamage)
++void unRegisterUnitAsTarget(EntityId targetUnitId, AttackType type)
++void subscribeUnitAttackedEvent(UnitAttackedHandler handler)
+}
+
+class MarchSystem {
++MarchStatus marchUnit(EntityId unitId, Speed<Cells> speed)
++void setMarchDestinationForUnit(EntityId unitId, const Coord<Cells>& destination)
++void subscribeUnitMarchEvents(UnitMarchStartedHandler marchStartedHandler, UnitMarchEndedHandler marchEndedHandler)
+}
+
+class Scenario {
++void subscribeEvents(EventHandlers handlers)
++void createMap(Width<Cells> width, Height<Cells> height)
++void spawnUnit(const Coord<Cells>& cell, UnitFaсtory unitFactory)
++void marchUnit(EntityId unitId, const Coord<Cells>& cell)
++void run()
+}
+
+class Hunter {
++EntityId id() const
++const char* type() const
++bool isAlive() const
++TurnStatus takeTurn()
++void subscribeUnitDestroyedEvent(UnitDestroyedHandler handler)
+}
+
+class Swordsman {
++EntityId id() const
++const char* type() const
++bool isAlive() const
++TurnStatus takeTurn()
++void subscribeUnitDestroyedEvent(UnitDestroyedHandler handler)
+}
+
+Scenario ..|> IScenario
+Scenario ..|> IUnitCreationContext
+
+CombatSystem ..|> ICombatSystem
+MarchSystem ..|> IMarchSystem
+
+Map ..|> IMap
+
+Hunter ..|> IUnit
+Swordsman ..|> IUnit
+
+' Владение (композиция)
+
+Scenario *-- ICombatSystem : owns
+Scenario *-- IMarchSystem : owns
+Scenario *-- IMap: owns
+Scenario *-- IUnit : owns
+Scenario *-- EventHandlers: owns
+
+Hunter --> ICombatSystem : uses
+Hunter --> IMarchSystem : uses
+
+Swordsman --> ICombatSystem : uses
+Swordsman --> IMarchSystem : uses
+
+CombatSystem --> IMap : uses
+MarchSystem --> IMap : uses
+
+@enduml

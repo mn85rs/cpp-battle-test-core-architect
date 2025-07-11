@@ -1,0 +1,24 @@
+@startuml
+actor Client
+
+participant "Scenario" as Scenario
+
+== Создание сценария ==
+Client -> Scenario : createScenario()
+Scenario --> Client : IScenarioPtr
+
+Client -> Scenario : subscribeEvents
+
+Client -> Scenario : createMap
+
+loop For each spawn unit command
+    Client -> Scenario : spawnUnit
+end
+
+loop For each march unit command
+    Client -> Scenario : marchUnit
+end
+
+Client -> Scenario : run()
+
+@enduml

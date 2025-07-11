@@ -1,0 +1,27 @@
+@startuml
+actor GameLoop
+participant Attacker
+participant CombatSystem
+participant Map
+participant Target
+
+Target -> CombatSystem: registerUnitAsTarget(targetId, takeDamageHandler)
+
+Attacker -> CombatSystem: attackFromUnit(attackerId, attack)
+
+CombatSystem -> Map: getUnitCell(attackerId)
+Map --> CombatSystem: attackerCell
+
+CombatSystem -> CombatSystem: findNearestCellToAttack(attackerCell)
+CombatSystem -> Map: getUnitAtCell(nearestCell)
+Map --> CombatSystem: targetId
+
+alt Цель найдена
+    CombatSystem -> Target: takeDamageHandler(damage)
+    Target --> CombatSystem: remaining HP
+    CombatSystem --> Attacker: SuccessfulAttack
+else Цель не найдена
+    CombatSystem --> Attacker: MissedAttack
+end
+
+@enduml

@@ -15,7 +15,7 @@ namespace sw::io
 		uint32_t targetHp{};
 
 		template <typename Visitor>
-		void visit(Visitor& visitor)
+		void visit(Visitor& visitor) const
 		{
 			visitor.visit("attackerUnitId", attackerUnitId);
 			visitor.visit("targetUnitId", targetUnitId);

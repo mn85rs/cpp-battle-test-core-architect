@@ -1,0 +1,94 @@
+@startuml
+actor Client
+participant Scenario
+participant Swordsman
+participant Marchable as Swordsman_March
+participant CombatSystem
+participant Map
+participant Hunter
+participant Hunter_Health
+participant Swordsman_Health
+
+== Spawn units ==
+Client -> Scenario: spawnUnit(swordsmanUnitFactory)
+Scenario -> Swordsman: swordsmanUnitFactory()
+Swordsman -> CombatSystem : registerUnitAsTarget(swordsmanId, swordsmanTakeDamageHandler)
+Swordsman --> Scenario: Swordsman
+Client -> Scenario: spawnUnit(hunterUnitFactory)
+Scenario -> Hunter: hunterUnitFactory()
+Hunter -> CombatSystem : registerUnitAsTarget(hunterId, hunterTakeDamageHandler)
+Hunter --> Scenario: Hunter
+
+Scenario -> MarchSystem: setMarchDestinationForUnit(swordsmanId, destination)
+
+Client -> Scenario: run()
+
+== Ход Swordsman ==
+Scenario -> Swordsman: takeTurn()
+Swordsman -> CombatSystem: attackFromUnit(swordsmanId, attack)
+
+CombatSystem -> Map: getUnitCell(swordsmanId)
+Map --> CombatSystem: swordsmanCell
+
+CombatSystem -> CombatSystem: findNearestCellToAttack(swordsmanCell)
+CombatSystem -> Map: getUnitAtCell(nearestCell)
+
+alt Hunter найден
+    Map --> CombatSystem: hunterId
+    CombatSystem -> Hunter: hunterTakeDamageHandler(damage)
+    Hunter -> Hunter: takeDamage(damage)
+    Hunter -> Hunter_Health: decrease(damage)
+    Hunter_Health --> Hunter: remaining HP
+
+    alt remaining HP == 0
+        Hunter -> Hunter: destroy()
+        Hunter -> CombatSystem: unRegisterUnitAsTarget(hunterId)
+    end
+
+    Hunter --> CombatSystem: remaining HP
+    CombatSystem --> Swordsman: SuccessfulAttack
+else Hunter не найден
+    CombatSystem --> Swordsman: MissedAttack
+end
+
+== Движение Swordsman ==
+Swordsman -> MarchSystem: marchUnit(swordsmanId, speed)
+MarchSystem -> MarchSystem: findNextCell(swordsmanId, destination, speed)
+MarchSystem -> Map: moveUnitToCell(swordsmanId, nextCell)
+MarchSystem --> Swordsman : MovingStatus
+
+Swordsman --> Scenario: TurnStatus::Acted
+
+== Ход Hunter ==
+Scenario -> Hunter: takeTurn()
+Hunter -> CombatSystem: attackFromUnit(hunterId, attack)
+
+CombatSystem -> Map: getUnitCell(hunterId)
+Map --> CombatSystem: hunterCell
+
+CombatSystem -> CombatSystem: findNearestCellToAttack(hunterCell)
+CombatSystem -> Map: getUnitAtCell(nearestCell)
+
+alt Swordsman найден
+    Map --> CombatSystem: swordsmanId
+    CombatSystem -> Swordsman: swordsmanTakeDamageHandler(damage)
+    Swordsman -> Swordsman: takeDamage(damage)
+    Swordsman -> Swordsman_Health: decrease(damage)
+    Swordsman_Health --> Swordsman: remaining HP
+
+    alt remaining HP == 0
+        Swordsman -> Swordsman: destroy()
+        Swordsman -> CombatSystem: unRegisterUnitAsTarget(swordsmanId)
+    end
+
+    Swordsman --> CombatSystem: remaining HP
+    CombatSystem --> Hunter: SuccessfulAttack
+else Swordsman не найден
+    CombatSystem --> Hunter: MissedAttack
+end
+
+Hunter --> Scenario: TurnStatus::Acted
+
+== Цикл завершён ==
+Scenario --> Client: end of run()
+@enduml
