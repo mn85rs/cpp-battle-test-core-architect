@@ -6,27 +6,21 @@
 
 namespace sw::sc
 {
-	Scenario::Scenario(Factories factories) :
+	Scenario::Scenario(Factories factories, sc::IEventsDispatcher& eventsDispatcher) :
 			_factories(std::move(factories)),
-			_tick(1)
-	{}
-
-	void Scenario::subscribeEvents(EventHandler eventHandler)
+			_tick(1),
+			_eventsDispatcher(eventsDispatcher)
 	{
-		_eventHandler = eventHandler;
+		_eventsDispatcher.subscribe([this](const io::UnitDied& event) { _map->removeUnitFromMap(event.unitId); });
 	}
 
 	void Scenario::createMap(Width<Cells> width, Height<Cells> height)
 	{
-		_map = _factories.createMap(width, height);
-		_combatSystem = _factories.createCombatSystem(*_map);
-		_marchSystem = _factories.createMarchSystem(*_map);
+		_map = _factories.createMap(width, height, _eventsDispatcher);
+		_combatSystem = _factories.createCombatSystem(*_map, _eventsDispatcher);
+		_marchSystem = _factories.createMarchSystem(*_map, _eventsDispatcher);
 
-		_map->subscribeEvents([this](const auto& event) { publishEvent(event); });
-		_combatSystem->subscribeEvents([this](const auto& event) { publishEvent(event); });
-		_marchSystem->subscribeEvents([this](const auto& event) { publishEvent(event); });
-
-		publishEvent(Event(io::MapCreated{width, height}));
+		_eventsDispatcher.publish(io::MapCreated{width, height});
 	}
 
 	void Scenario::spawnUnit(const Coord<Cells>& cell, UnitFaсtory unitFactory)
@@ -48,17 +42,6 @@ namespace sw::sc
 			throw std::runtime_error(std::format("Error: Unit with id = {} is already spawned", unit->id()));
 		}
 
-		unit->subscribeEvents(
-			[this](const auto& event)
-			{
-				if constexpr (std::is_same_v<std::decay_t<decltype(event)>, io::UnitDied>)
-				{
-					_map->removeUnitFromMap(event.unitId);
-				}
-
-				publishEvent(event);
-			});
-
 		const auto unitId = unit->id();
 		const std::string unitType = unit->type();
 
@@ -67,7 +50,7 @@ namespace sw::sc
 		_units.emplace_back(unitId);
 		_unitIdToUnit.emplace(unitId, std::move(unit));
 
-		publishEvent(Event(io::UnitSpawned{unitId, unitType, cell.x(), cell.y()}));
+		_eventsDispatcher.publish(io::UnitSpawned{unitId, unitType, cell.x(), cell.y()});
 	}
 
 	void Scenario::marchUnit(EntityId unitId, const Coord<Cells>& cell)
@@ -127,32 +110,23 @@ namespace sw::sc
 		}
 	}
 
-	ICombatSystem& Scenario::GetCombatSystem()
+	ICombatSystem& Scenario::getCombatSystem()
 	{
 		return *_combatSystem;
 	}
 
-	IMarchSystem& Scenario::GetMarchSystem()
+	IMarchSystem& Scenario::getMarchSystem()
 	{
 		return *_marchSystem;
 	}
 
-	template <typename... EventTypes>
-	void Scenario::publishEvent(const sw::sc::Event<EventTypes...>& event)
+	IEventsDispatcher& Scenario::getEventsDispatcher()
 	{
-		std::visit(
-			[this](const auto& concreteEvent)
-			{
-				if (_eventHandler)
-				{
-					_eventHandler(_tick, concreteEvent);
-				}
-			},
-			event);
+		return _eventsDispatcher;
 	}
 
-	IScenarioPtr createScenario()
+	IScenarioPtr createScenario(IEventsDispatcher& eventsDispather)
 	{
-		return std::make_unique<Scenario>(Scenario::Factories{createMap, createCombatSystem, createMarchSystem});
+		return std::make_unique<Scenario>(Scenario::Factories{createMap, createCombatSystem, createMarchSystem}, eventsDispather);
 	}
 }

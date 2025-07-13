@@ -11,8 +11,9 @@ namespace sw::sc
 		Agility agility,
 		Range range,
 		ICombatSystem& combatSystem,
-		IMarchSystem& movementSystem) :
-			Trooper(id, maxHP, combatSystem, movementSystem),
+		IMarchSystem& movementSystem,
+		IEventsDispatcher& eventDispatcher) :
+			Trooper(id, maxHP, combatSystem, movementSystem, eventDispatcher),
 			_strenght(strenght),
 			_agility(agility),
 			_range(range)
@@ -71,7 +72,8 @@ namespace sw::sc
 			command.strength,
 			command.agility,
 			command.range,
-			context.GetCombatSystem(),
-			context.GetMarchSystem());
+			context.getCombatSystem(),
+			context.getMarchSystem(),
+			context.getEventsDispatcher());
 	}
 }

@@ -2,6 +2,7 @@
 
 #include <Scenario/System/CombatSystem/ICombatSystem.hpp>
 #include <Scenario/Utils/Coord.hpp>
+#include <Scenario/Utils/EventDispatcher.hpp>
 #include <unordered_set>
 
 namespace sw::sc
@@ -14,14 +15,12 @@ namespace sw::sc
 		using Units = std::unordered_set<EntityId>;
 
 	public:
-		CombatSystem(const IMap& map);
+		CombatSystem(const IMap& map, IEventsDispatcher& eventsDispatcher);
 
 		AttackResult attackByUnit(EntityId attackerUnitId, const Attack& attack) override;
 		void registerUnitAsTarget(
 			EntityId targetUnitId, AttackTypes attackTypes, TakeDamageHandler takeDamageHandler) override;
 		void unRegisterUnitAsTarget(EntityId targetUnitId, AttackTypes attackTypes) override;
-
-		void subscribeEvents(EventHandler eventHandler) override;
 
 	private:
 		using TargetDamageHandlers = std::unordered_map<EntityId, TakeDamageHandler>;
@@ -42,6 +41,6 @@ namespace sw::sc
 		const IMap& _map;
 		AttackTypeToTargets _targets;
 		TargetDamageHandlers _takeDamageHandlers;
-		EventHandler _eventHandler;
+		IEventsDispatcher& _eventsDispatcher;
 	};
 }

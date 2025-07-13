@@ -2,8 +2,9 @@
 
 namespace sw::sc
 {
-	Unit::Unit(EntityId id) :
-			_id(id)
+	Unit::Unit(EntityId id, IEventsDispatcher& eventDispatcher) :
+			_id(id),
+			_eventDispatcher(eventDispatcher)
 	{}
 
 	EntityId Unit::id() const
@@ -11,16 +12,8 @@ namespace sw::sc
 		return _id;
 	}
 
-	void Unit::subscribeEvents(EventHandler eventHandler)
-	{
-		_eventHandler = eventHandler;
-	}
-
 	void Unit::destroy()
 	{
-		if (_eventHandler)
-		{
-			_eventHandler(io::UnitDied{id()});
-		}
+		_eventDispatcher.publish(io::UnitDied{id()});
 	}
 }

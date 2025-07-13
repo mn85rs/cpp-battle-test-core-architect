@@ -2,6 +2,7 @@
 
 #include "Utils/Common.hpp"
 #include "Utils/Event.hpp"
+#include "Utils/EventDispatcher.hpp"
 
 #include <IO/Events/UnitDied.hpp>
 #include <functional>
@@ -17,8 +18,9 @@ namespace sw::sc
 {
 	struct IUnitCreationContext
 	{
-		virtual struct ICombatSystem& GetCombatSystem() = 0;
-		virtual struct IMarchSystem& GetMarchSystem() = 0;
+		virtual struct ICombatSystem& getCombatSystem() = 0;
+		virtual struct IMarchSystem& getMarchSystem() = 0;
+		virtual IEventsDispatcher& getEventsDispatcher() = 0;
 	};
 
 	enum class TurnStatus
@@ -29,14 +31,10 @@ namespace sw::sc
 
 	struct IUnit
 	{
-		using EventHandler = std::function<void(const Event<io::UnitDied>&)>;
-
 		virtual EntityId id() const = 0;
 		virtual const char* type() const = 0;
 		virtual bool isAlive() const = 0;
 		virtual TurnStatus takeTurn() = 0;
-
-		virtual void subscribeEvents(EventHandler handler) = 0;
 
 		virtual ~IUnit() = default;
 	};

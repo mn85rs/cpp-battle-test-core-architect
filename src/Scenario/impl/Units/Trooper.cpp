@@ -2,8 +2,13 @@
 
 namespace sw::sc
 {
-	Trooper::Trooper(EntityId id, HitPoints maxHP, ICombatSystem& combatSystem, IMarchSystem& marchSystem) :
-			Unit(id),
+	Trooper::Trooper(
+		EntityId id,
+		HitPoints maxHP,
+		ICombatSystem& combatSystem,
+		IMarchSystem& marchSystem,
+		IEventsDispatcher& eventDispatcher) :
+			Unit(id, eventDispatcher),
 			_health(maxHP),
 			_combatSystem(combatSystem),
 			_marchSystem(marchSystem)

@@ -8,7 +8,12 @@ namespace sw::sc
 	{
 	public:
 		Swordsman(
-			EntityId id, HitPoints maxHP, Strength strenght, ICombatSystem& combatSystem, IMarchSystem& movementSystem);
+			EntityId id,
+			HitPoints maxHP,
+			Strength strenght,
+			ICombatSystem& combatSystem,
+			IMarchSystem& movementSystem,
+			IEventsDispatcher& eventDispatcher);
 
 		const char* type() const override;
 

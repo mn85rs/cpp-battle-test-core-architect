@@ -72,8 +72,9 @@ namespace sw::sc
 		}
 	}
 
-	CombatSystem::CombatSystem(const IMap& map) :
-			_map(map)
+	CombatSystem::CombatSystem(const IMap& map, IEventsDispatcher& eventsDispatcher) :
+			_map(map),
+			_eventsDispatcher(eventsDispatcher)
 	{}
 
 	AttackResult CombatSystem::attackByUnit(EntityId attackerUnitId, const Attack& attack)
@@ -126,11 +127,6 @@ namespace sw::sc
 		}
 	}
 
-	void CombatSystem::subscribeEvents(EventHandler eventHandler)
-	{
-		_eventHandler = std::move(eventHandler);
-	}
-
 	void CombatSystem::attackTarget(
 		EntityId attackerUnitId,
 		EntityId targetUnitId,
@@ -143,10 +139,7 @@ namespace sw::sc
 			damage,
 			[attackerUnitId, targetUnitId, damage, this](HitPoints targetRemainingHP)
 			{
-				if (_eventHandler)
-				{
-					_eventHandler(io::UnitAttacked{attackerUnitId, targetUnitId, damage, targetRemainingHP});
-				}
+				_eventsDispatcher.publish(io::UnitAttacked{attackerUnitId, targetUnitId, damage, targetRemainingHP});
 			});
 	}
 
@@ -178,8 +171,8 @@ namespace sw::sc
 		return Units(unitsInsideAttackArea.begin(), unitsInsideAttackArea.end());
 	}
 
-	ICombatSystemPtr createCombatSystem(const IMap& map)
+	ICombatSystemPtr createCombatSystem(const IMap& map, IEventsDispatcher& eventsDispatcher)
 	{
-		return std::make_unique<CombatSystem>(map);
+		return std::make_unique<CombatSystem>(map, eventsDispatcher);
 	}
 }

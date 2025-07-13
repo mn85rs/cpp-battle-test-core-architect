@@ -14,7 +14,8 @@ namespace sw::sc
 			Agility agility,
 			Range range,
 			ICombatSystem& combatSystem,
-			IMarchSystem& movementSystem);
+			IMarchSystem& movementSystem,
+			IEventsDispatcher& eventDispatcher);
 
 		const char* type() const override;
 

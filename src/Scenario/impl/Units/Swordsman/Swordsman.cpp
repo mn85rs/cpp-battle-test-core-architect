@@ -5,8 +5,13 @@
 namespace sw::sc
 {
 	Swordsman::Swordsman(
-		EntityId id, HitPoints maxHP, Strength strenght, ICombatSystem& combatSystem, IMarchSystem& movementSystem) :
-			Trooper(id, maxHP, combatSystem, movementSystem),
+		EntityId id,
+		HitPoints maxHP,
+		Strength strenght,
+		ICombatSystem& combatSystem,
+		IMarchSystem& movementSystem,
+		IEventsDispatcher& eventDispatcher) :
+			Trooper(id, maxHP, combatSystem, movementSystem, eventDispatcher),
 			_strenght(strenght)
 	{}
 
@@ -43,6 +48,6 @@ namespace sw::sc
 	IUnitPtr createUnit(const io::SpawnSwordsman& command, IUnitCreationContext& context)
 	{
 		return std::make_unique<Swordsman>(
-			command.unitId, command.hp, command.strength, context.GetCombatSystem(), context.GetMarchSystem());
+			command.unitId, command.hp, command.strength, context.getCombatSystem(), context.getMarchSystem(), context.getEventsDispatcher());
 	}
 }

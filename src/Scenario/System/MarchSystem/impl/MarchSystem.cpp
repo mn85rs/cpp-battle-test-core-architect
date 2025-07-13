@@ -3,8 +3,9 @@
 namespace sw::sc
 {
 
-	MarchSystem::MarchSystem(IMap& _map) :
-			_map(_map)
+	MarchSystem::MarchSystem(IMap& _map, IEventsDispatcher& eventsDispatcher) :
+			_map(_map),
+			_eventsDispatcher(eventsDispatcher)
 	{}
 
 	MarchStatus MarchSystem::marchUnit(EntityId unitId, Speed<Cells> speed)
@@ -21,10 +22,7 @@ namespace sw::sc
 		{
 			_marchingUnits.erase(unitId);
 
-			if (_eventHandler)
-			{
-				_eventHandler(io::MarchEnded{unitId, destinationCell.x(), destinationCell.y()});
-			}
+			_eventsDispatcher.publish(io::MarchEnded{unitId, destinationCell.x(), destinationCell.y()});
 		}
 
 		return MarchStatus::Marching;
@@ -34,16 +32,11 @@ namespace sw::sc
 	{
 		_marchingUnits.insert_or_assign(unitId, destination);
 		const auto currentCell = _map.getUnitCell(unitId);
-		_eventHandler(io::MarchStarted{unitId, currentCell.x(), currentCell.y(), destination.x(), destination.y()});
+		_eventsDispatcher.publish(io::MarchStarted{unitId, currentCell.x(), currentCell.y(), destination.x(), destination.y()});
 	}
 
-	void MarchSystem::subscribeEvents(EventHandler eventHandler)
+	IMarchSystemPtr createMarchSystem(IMap& map, IEventsDispatcher& eventsDispatcher)
 	{
-		_eventHandler = std::move(eventHandler);
-	}
-
-	IMarchSystemPtr createMarchSystem(IMap& map)
-	{
-		return std::make_unique<MarchSystem>(map);
+		return std::make_unique<MarchSystem>(map, eventsDispatcher);
 	}
 }

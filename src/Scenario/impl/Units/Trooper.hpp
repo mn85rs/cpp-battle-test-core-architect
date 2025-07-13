@@ -12,7 +12,12 @@ namespace sw::sc
 	class Trooper : public Unit
 	{
 	public:
-		Trooper(EntityId id, HitPoints maxHP, ICombatSystem& combatSystem, IMarchSystem& marchSystem);
+		Trooper(
+			EntityId id,
+			HitPoints maxHP,
+			ICombatSystem& combatSystem,
+			IMarchSystem& marchSystem,
+			IEventsDispatcher& eventDispatcher);
 
 		bool isAlive() const override;
 

@@ -11,7 +11,7 @@ namespace sw::sc
 	class Map : public IMap
 	{
 	public:
-		Map(Width<Cells> width, Height<Cells> height);
+		Map(Width<Cells> width, Height<Cells> height, IEventsDispatcher& eventsDispatcher);
 
 		Coord<Cells> getUnitCell(EntityId unitId) const override;
 		std::unordered_set<EntityId> getUnitsInArea(const Coord<Cells>& center, Cells range) const override;
@@ -22,7 +22,6 @@ namespace sw::sc
 			EntityId unitId, const Coord<Cells>& destinationCell, Cells totalCellsToMove) override;
 		void addUnitOnMap(EntityId unitId, const Coord<Cells>& cell) override;
 		void removeUnitFromMap(EntityId unitId) override;
-		void subscribeEvents(EventHandler eventHandler) override;
 
 	private:
 		void moveUnitToCell(EntityId unitId, const Coord<Cells>& cell);
@@ -37,13 +36,14 @@ namespace sw::sc
 		UnitToCell _units;
 		CellToUnit _cells;
 
-		EventHandler _eventHandler;
+		IEventsDispatcher& _eventsDispatcher;
 	};
 
 	template <typename PathFindingPolicy>
-	Map<PathFindingPolicy>::Map(Width<Cells> width, Height<Cells> height) :
+	Map<PathFindingPolicy>::Map(Width<Cells> width, Height<Cells> height, IEventsDispatcher& eventsDispatcher) :
 			_width(width),
-			_height(height)
+			_height(height),
+			_eventsDispatcher(eventsDispatcher)
 	{}
 
 	template <typename PathFindingPolicy>
@@ -113,7 +113,7 @@ namespace sw::sc
 
 		moveUnitToCell(unitId, nextUnitCell);
 
-		_eventHandler(io::UnitMoved{unitId, nextUnitCell.x(), nextUnitCell.y()});
+		_eventsDispatcher.publish(io::UnitMoved{unitId, nextUnitCell.x(), nextUnitCell.y()});
 
 		return nextUnitCell;
 	}
@@ -153,12 +153,6 @@ namespace sw::sc
 		}
 
 		_units.erase(unitId);
-	}
-
-	template <typename PathFindingPolicy>
-	void Map<PathFindingPolicy>::subscribeEvents(EventHandler eventHandler)
-	{
-		_eventHandler = std::move(eventHandler);
 	}
 
 	template <typename PathFindingPolicy>

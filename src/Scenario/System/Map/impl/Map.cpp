@@ -4,8 +4,8 @@
 
 namespace sw::sc
 {
-	IMapPtr createMap(Width<Cells> width, Height<Cells> height)
+	IMapPtr createMap(Width<Cells> width, Height<Cells> height, IEventsDispatcher& eventsDispatcher)
 	{
-		return std::make_unique<Map<SimplePathFinding>>(width, height);
+		return std::make_unique<Map<SimplePathFinding>>(width, height, eventsDispatcher);
 	}
 }

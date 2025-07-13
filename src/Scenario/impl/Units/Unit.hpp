@@ -7,18 +7,17 @@ namespace sw::sc
 	class Unit : public IUnit
 	{
 	public:
-		Unit(EntityId id);
+		Unit(EntityId id, IEventsDispatcher& eventDispatcher);
 
 		virtual ~Unit() = default;
 
 		EntityId id() const override;
-		void subscribeEvents(EventHandler eventHandler) override;
 
 	protected:
 		void destroy();
 
 	private:
-		EventHandler _eventHandler;
+		IEventsDispatcher& _eventDispatcher;
 		EntityId _id;
 	};
 }

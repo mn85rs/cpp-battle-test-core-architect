@@ -8,15 +8,11 @@
 #include <IO/System/EventLog.hpp>
 #include <Scenario/IScenario.hpp>
 #include <Scenario/ScenarioLoader.hpp>
+#include <Scenario/Utils/EventDispatcher.hpp>
 #include <filesystem>
 #include <fstream>
 
 using namespace sw;
-
-void logEvent(EventLog& eventLog, uint64_t tick, const sc::IScenario::Event& event)
-{
-	std::visit([&eventLog, &tick](const auto& event) { eventLog.log(tick, event); }, event);
-}
 
 int main(int argc, char** argv)
 {
@@ -34,11 +30,13 @@ int main(int argc, char** argv)
 			throw std::runtime_error("Error: File not found - " + std::string(argv[1]));
 		}
 
-		EventLog eventLog;
-		const sc::IScenarioPtr scenario = sc::createScenario();
+		sc::IEventsDispatcherPtr eventsDispatcher = sc::createEventDispatcher();
 
-		scenario->subscribeEvents([&eventLog](uint64_t tick, const sc::IScenario::Event& event)
-								  { logEvent(eventLog, tick, event); });
+		EventLog eventLog;
+		const sc::IScenarioPtr scenario = sc::createScenario(*eventsDispatcher);
+
+		ed::setEventsHandler(
+			*eventsDispatcher, [&eventLog, &scenario](const auto& event) { eventLog.log(scenario->getTick(), event); });
 
 		std::cout << "Commands:\n";
 

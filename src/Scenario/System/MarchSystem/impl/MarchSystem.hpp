@@ -9,13 +9,11 @@ namespace sw::sc
 	class MarchSystem : public IMarchSystem
 	{
 	public:
-		MarchSystem(IMap& _map);
+		MarchSystem(IMap& _map, IEventsDispatcher& eventsDispatcher);
 
 		MarchStatus marchUnit(EntityId unitId, Speed<Cells> speed) override;
 
 		void setMarchDestinationForUnit(EntityId unitId, const Coord<Cells>& destination) override;
-
-		void subscribeEvents(EventHandler eventHandler) override;
 
 	private:
 		using MarchingUnits = std::unordered_map<EntityId, Coord<Cells>>;
@@ -23,6 +21,6 @@ namespace sw::sc
 	private:
 		IMap& _map;
 		MarchingUnits _marchingUnits;
-		EventHandler _eventHandler;
+		IEventsDispatcher& _eventsDispatcher;
 	};
 }

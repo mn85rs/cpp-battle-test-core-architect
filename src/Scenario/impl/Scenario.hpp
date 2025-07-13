@@ -12,15 +12,13 @@ namespace sw::sc
 	public:
 		struct Factories
 		{
-			std::function<IMapPtr(Width<Cells>, Height<Cells>)> createMap;
-			std::function<ICombatSystemPtr(const IMap&)> createCombatSystem;
-			std::function<IMarchSystemPtr(IMap&)> createMarchSystem;
+			std::function<IMapPtr(Width<Cells>, Height<Cells>, sc::IEventsDispatcher&)> createMap;
+			std::function<ICombatSystemPtr(const IMap&, sc::IEventsDispatcher&)> createCombatSystem;
+			std::function<IMarchSystemPtr(IMap&, sc::IEventsDispatcher&)> createMarchSystem;
 		};
 
 	public:
-		Scenario(Factories factories);
-
-		void subscribeEvents(EventHandler eventHandler) override;
+		Scenario(Factories factories, sc::IEventsDispatcher& eventsDispatcher);
 
 		void createMap(Width<Cells> width, Height<Cells> height) override;
 		void spawnUnit(const Coord<Cells>& cell, UnitFaсtory unitFactory) override;
@@ -28,12 +26,12 @@ namespace sw::sc
 
 		void run() override;
 
-	private:
-		ICombatSystem& GetCombatSystem() override;
-		IMarchSystem& GetMarchSystem() override;
+		uint64_t getTick() const override { return _tick; }
 
-		template <typename... EventTypes>
-		void publishEvent(const sw::sc::Event<EventTypes...>& event);
+	private:
+		ICombatSystem& getCombatSystem() override;
+		IMarchSystem& getMarchSystem() override;
+		IEventsDispatcher& getEventsDispatcher() override;
 
 	private:
 		Factories _factories;
@@ -50,6 +48,6 @@ namespace sw::sc
 
 		uint64_t _tick;
 
-		EventHandler _eventHandler;
+		sc::IEventsDispatcher& _eventsDispatcher;
 	};
 }
